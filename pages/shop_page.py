@@ -54,15 +54,39 @@ class ProductCardPage(BasePage):
     def count_product_in_cart(self) -> int:
         return int(self.element_is_visible(self.locator.SHOPPING_CART).text)
 
-    def get_prod(self, list_id: list, products: dict) -> str:
-        for _id in list_id:
-            text_btn = products[_id]["element"].find_element(By.CSS_SELECTOR, self.locator.BUTTON).text
-            name = products[_id]["name"]
-            yield text_btn, name
+    def get_btn_text(self, product_id: str, products: dict) -> str:
+        return products[product_id]["element"].find_element(By.CSS_SELECTOR, self.locator.BTN).text
 
-    def get_text_btn(self, product_id: list, products: dict) -> dict:
-        result = {}
-        for _id in product_id:
-            text_btn = products[_id]["element"].find_element(By.CSS_SELECTOR, self.locator.BUTTON).text
-            result.update({_id: text_btn})
-        return result
+    def get_text_btn_dict(self, product_id: list, products: dict) -> dict:
+        res = {_id: products[_id]["element"].find_element(By.CSS_SELECTOR, self.locator.BTN).text for _id in product_id}
+        return res
+
+    def correctly_sorted_data(self, sort_method: str) -> list:
+        if sort_method == "a_z":
+            return sorted([i.text for i in self.element_are_visible(self.locator.PRODUCT_NAME)])
+        elif sort_method == "z_a":
+            return sorted([i.text for i in self.element_are_visible(self.locator.PRODUCT_NAME)], reverse=True)
+        elif sort_method == "low_high":
+            return sorted([float(i.text.replace("$", "")) for i in self.element_are_visible(self.locator.PRODUCT_PRICE)])
+        elif sort_method == "high_low":
+            return sorted([float(i.text.replace("$", "")) for i in self.element_are_visible(self.locator.PRODUCT_PRICE)],
+                          reverse=True)
+
+    def sort_products(self, sort_method: str) -> list:
+        self.element_is_visible(self.locator.SELECT_SORT).click()
+        if sort_method == "a_z":
+            self.element_is_visible(self.locator.A_Z).click()
+            return [i.text for i in self.element_are_visible(self.locator.PRODUCT_NAME)]
+        elif sort_method == "z_a":
+            self.element_is_visible(self.locator.Z_A).click()
+            return [i.text for i in self.element_are_visible(self.locator.PRODUCT_NAME)]
+        elif sort_method == "low_high":
+            self.element_is_visible(self.locator.LOV_TO_HIGH).click()
+            return [float(i.text.replace("$", "")) for i in self.element_are_visible(self.locator.PRODUCT_PRICE)]
+        elif sort_method == "high_low":
+            self.element_is_visible(self.locator.HIGH_TO_LOV).click()
+            return [float(i.text.replace("$", "")) for i in self.element_are_visible(self.locator.PRODUCT_PRICE)]
+
+
+
+
